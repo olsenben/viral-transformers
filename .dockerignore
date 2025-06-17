@@ -1,0 +1,9 @@
+__pycach__/
+*.pyc 
+*.pyo
+*.pyd
+*.ipynb_checkpoints
+.env
+outputs/
+data/raw/
+data/processed/
