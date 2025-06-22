@@ -1,0 +1,12 @@
+{
+  "name": "Viral Transformers",
+  "image": "viral-transformers",
+  "runArgs": [
+    "--gpus=all",
+    "-p", "8888:8888"
+  ],
+  "workspaceFolder": "/app",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/app,type=bind"
+  ]
+}
