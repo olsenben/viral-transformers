@@ -51,9 +51,9 @@ def process_codon_file(csv_path, wt_sequence_path, output_path):
     df = pd.read_csv(csv_path)
     wt_aa_seq = load_wt_aa_sequence(wt_sequence_path)
 
-    df['mutated_seq'] = df['aa_substitutions'].apply(lambda x: apply_mutations(wt_aa_seq, x))
+    df['mutated_seq'] = df['aa_substitutions'].apply(lambda x: apply_mutations(wt_aa_seq, x) if pd.notnull(x) else x)
 
-    output_cols = ["target", "barcode", "aa_subsitutions", 'mutated_seq', "n_aa_substitutions"]
+    output_cols = ["target", "barcode", "aa_substitutions", 'mutated_seq', "n_aa_substitutions"]
 
     df[output_cols].to_csv(output_path, index=False)
     print (f"Saved processed data to {output_path}")
@@ -66,14 +66,27 @@ def merge_variant_binding_scores(variants_filepath, binding_filepath, output_pat
     variants_df = pd.read_csv(variants_filepath)
 
     binding_df = pd.read_csv(binding_filepath)
-
+    
+    #merge
     merged_df = pd.merge(
         variants_df,
         binding_df,
-        on=['target', 'barcode']
+        on=['target', 'barcode'],
+        how='inner',
+        suffixes=('_variants', '_binding')
     )
 
-    merged_df = merged_df.dropna(subset="log10Ka")
+    #sanity check
+    if "target_variants" in merged_df.columns and "target_binding" in merged_df.columns:
+        if not (merged_df["target_variants"] == merged_df["target_binding"]).all():
+            print("Error: mismatch in target columns after merge")
+    elif "target" not in merged_df:
+        print("Error: no 'target' column found after merge")
 
-    merged_df.to_csv(output_path)
+    #drop rows with missing binding or sequence
+    merged_df = merged_df.dropna(subset=["log10Ka", "mutated_seq"])
+
+    df_final = merged_df[['mutated_seq', 'log10Ka']]
+
+    df_final.to_csv(output_path, index=False)
     print(f"saved merged data to {output_path}")

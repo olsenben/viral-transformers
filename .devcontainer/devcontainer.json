@@ -8,5 +8,13 @@
   "workspaceFolder": "/app",
   "mounts": [
     "source=${localWorkspaceFolder},target=/app,type=bind"
-  ]
+  ],
+  "settings": {
+    // Tells the Python extension where to look for modules like "utils"
+    "python.analysis.extraPaths": ["${workspaceFolder}/src"],
+    // Ensures PYTHONPATH is set in all integrated terminals
+    "terminal.integrated.env.linux": {
+      "PYTHONPATH": "${workspaceFolder}/src"
+    }
+  }
 }
